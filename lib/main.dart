@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'network_repo.dart';
+import 'model.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -27,7 +28,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
+    NetWorkRepo.requestNewsList(0).then((stories) {
+      for(StoryModel item in stories) {
+        print(item.toJson().toString());
+      }
+    });
   }
 
   @override
