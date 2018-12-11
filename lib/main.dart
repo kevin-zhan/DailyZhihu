@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'network_repo.dart';
 import 'model.dart';
 import 'view_model.dart';
 
@@ -63,7 +62,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildRow(StoryModel story) {
     return Card(
-      child: Text(story.title),
+      child: Container(
+        height: 90,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(width: 10,),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    height: 10,
+                  ),
+                  Text(
+                    story.title,
+                    softWrap: true,
+                    textAlign: TextAlign.left,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+            Center(
+              child: Image.network(
+                story.images[0],
+                height: 70,
+              ),
+            ),
+            Container(width: 10,),
+          ],
+        ),
+      ),
     );
   }
 
