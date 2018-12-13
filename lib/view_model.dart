@@ -5,7 +5,7 @@ import 'network_repo.dart';
 class StoryListViewModel {
   var _storyListController = StreamController<StoryListModel>.broadcast();
   List<StoryModel> storyList = List();
-  var offset = 0;
+  var offset = -1;
 
   Sink get inStoryListController => _storyListController;
 
