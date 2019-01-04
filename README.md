@@ -1,6 +1,6 @@
 # daily_zhihu
 
-A zhihu daily new app wrote in Flutter just for trying MVVM in Flutter.
+A zhihu daily news app wrote in Flutter just for trying MVVM in Flutter.
 
 ## Thanks
 The project is a try of mvvm in flutter. I don't have too much time to polish it.
