@@ -2,8 +2,13 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'model.dart';
 import 'dart:convert';
+import 'story_renderer.dart';
+
+
 class NetWorkRepo {
-  static const String FETCH_NEWS_LIST = "https://news-at.zhihu.com/api/4/news/before/";
+  static const String FETCH_NEWS_LIST =
+      "https://news-at.zhihu.com/api/4/news/before/";
+
   static Future<StoryListModel> requestNewsList(int offset) async {
     var reqUrl = FETCH_NEWS_LIST + constructOffsetParam(offset);
     print("=======================");
@@ -11,7 +16,8 @@ class NetWorkRepo {
     var response = await http.get(reqUrl);
     print(response.body);
     print("=======================");
-    StoryListModel storyListModel = StoryListModel.fromJson(jsonDecode(response.body));
+    StoryListModel storyListModel =
+        StoryListModel.fromJson(jsonDecode(response.body));
     return storyListModel;
   }
 
@@ -28,4 +34,10 @@ class NetWorkRepo {
     return timeStr;
   }
 
+  static Future<StoryContentModel> requestNewsContent(int newsId) async {
+    final response =
+        await http.get("https://news-at.zhihu.com/api/4/news/$newsId");
+    var content = StoryContentModel.fromJson(json.decode(response.body));
+    return content;
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'model.dart';
 import 'view_model.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 void main() => runApp(MyApp());
 
@@ -61,40 +62,53 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildRow(StoryModel story) {
-    return Card(
-      child: Container(
-        height: 90,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(width: 10,),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    height: 10,
-                  ),
-                  Text(
-                    story.title,
-                    softWrap: true,
-                    textAlign: TextAlign.left,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => StoryContentPage(storyId: story.id)));
+      },
+      child: Card(
+        child: Container(
+          height: 90,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 10,
               ),
-            ),
-            Center(
-              child: Image.network(
-                story.images[0],
-                height: 70,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      height: 10,
+                    ),
+                    Text(
+                      story.title,
+                      softWrap: true,
+                      textAlign: TextAlign.left,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Container(width: 10,),
-          ],
+              Center(
+                child: Image.network(
+                  story.images[0],
+                  height: 70,
+                ),
+              ),
+              Container(
+                width: 10,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -103,4 +117,61 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildLoadMoreView() {
     return Center(child: Text("加载中..."));
   }
+}
+
+class StoryContentPage extends StatefulWidget {
+  final int storyId;
+
+  StoryContentPage({Key key, @required int storyId})
+      : storyId = storyId,
+        super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _StoryContentPageState(storyId);
+}
+
+class _StoryContentPageState extends State<StoryContentPage> {
+  final StoryContentViewModel storyContentViewModel;
+
+  _StoryContentPageState(int storyId)
+      : storyContentViewModel = StoryContentViewModel(storyId),
+        super();
+
+  @override
+  void initState() {
+    super.initState();
+    storyContentViewModel.fetchStoryContent();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(
+        title: StreamBuilder(
+            stream: storyContentViewModel.outStoryTitle,
+            builder: (context, snapshot) {
+              var title = snapshot.data;
+              return Text(title == null ? "加载中..." : title);
+            }),
+      ),
+      body: StreamBuilder(
+          stream: storyContentViewModel.outStoryHtml,
+          builder: (context, snapshot) {
+            var html = snapshot.data;
+            if (html != null) {
+              return _buildStoryContent(context, html);
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }));
+
+  Widget _buildStoryContent(BuildContext context, String html) =>
+      WebviewScaffold(
+          withJavascript: true,
+          withZoom: false,
+          allowFileURLs: false,
+          url: Uri.dataFromString(html,
+              mimeType: 'text/html',
+              parameters: {'charset': "utf-8"}).toString());
 }
