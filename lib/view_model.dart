@@ -3,71 +3,72 @@ import 'model.dart';
 import 'network_repo.dart';
 import 'story_renderer.dart';
 
-class StoryListViewModel {
-  var _storyListController = StreamController<StoryListModel>.broadcast();
+abstract class BaseViewModel<T> {
+  var _dataSourceController = StreamController<T>.broadcast();
+
+  Sink get inputData => _dataSourceController;
+
+  Stream get outputData => _dataSourceController.stream;
+
+  depose() {
+    _dataSourceController.close();
+  }
+}
+
+class StoryListViewModel extends BaseViewModel<StoryListModel> {
   List<StoryModel> storyList = List();
   var offset = -1;
 
-  Sink get inStoryListController => _storyListController;
-
-  Stream<List<StoryModel>> get outStoryList => _storyListController.stream.map((stories) {
-    storyList.addAll(stories.stories);
-    return storyList;
-  });
+  Stream<List<StoryModel>> get outStoryList => outputData.map((stories) {
+        storyList.addAll(stories.stories);
+        return storyList;
+      });
 
   refreshStoryList() async {
     offset = 0;
     storyList.clear();
     StoryListModel model = await NetWorkRepo.requestNewsList(offset);
-    inStoryListController.add(model);
+    inputData.add(model);
   }
 
   loadNextPage() async {
     offset++;
     StoryListModel model = await NetWorkRepo.requestNewsList(offset);
-    inStoryListController.add(model);
-  }
-
-  depose() {
-    _storyListController.close();
+    inputData.add(model);
   }
 }
 
-class StoryContentViewModel {
+class StoryContentViewModel extends BaseViewModel<StoryContentModel> {
   int storyId;
 
   StoryContentViewModel(this.storyId);
 
-  var _storyContentController = StreamController<StoryContentModel>.broadcast();
+  Stream<StoryContentModel> get outStoryContent =>
+      outputData.map((storyContent) {
+        return storyContent;
+      });
 
-  Sink get inStoryContentController => _storyContentController;
+  Stream<String> get outStoryTitle => outputData.map((storyContent) {
+        if (storyContent == null) {
+          return "加载中";
+        }
+        return storyContent.title;
+      });
 
-  Stream<StoryContentModel> get outStoryContent => _storyContentController.stream.map((storyContent) {
-    return storyContent;
-  });
-
-  Stream<String> get outStoryTitle => _storyContentController.stream.map((storyContent) {
-    if (storyContent == null) {
-      return "加载中";
-    }
-    return storyContent.title;
-  });
-
-  Stream<String> get outStoryHtml => _storyContentController.stream.asyncMap((storyContent) {
-    if (storyContent == null) {
-      return "";
-    }
-    return makeStoryContextHtml(storyContent);
-
-  });
+  Stream<String> get outStoryHtml => outputData.asyncMap((storyContent) {
+        if (storyContent == null) {
+          return "";
+        }
+        return makeStoryContextHtml(storyContent);
+      });
 
   fetchStoryContent() async {
-    StoryContentModel contentModel = await NetWorkRepo.requestNewsContent(storyId);
-    inStoryContentController.add(contentModel);
+    StoryContentModel contentModel =
+        await NetWorkRepo.requestNewsContent(storyId);
+    inputData.add(contentModel);
   }
 
   depose() {
-    _storyContentController.close();
+    inputData.close();
   }
-
 }
