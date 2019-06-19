@@ -10,7 +10,7 @@ abstract class BaseViewModel<T> {
 
   Stream get outputData => _dataSourceController.stream;
 
-  depose() {
+  dispose() {
     _dataSourceController.close();
   }
 }
@@ -66,9 +66,5 @@ class StoryContentViewModel extends BaseViewModel<StoryContentModel> {
     StoryContentModel contentModel =
         await NetWorkRepo.requestNewsContent(storyId);
     inputData.add(contentModel);
-  }
-
-  depose() {
-    inputData.close();
   }
 }

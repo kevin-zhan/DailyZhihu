@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'model.dart';
 import 'view_model.dart';
+import 'package:flutter_image/network.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 void main() => runApp(MyApp());
@@ -32,6 +33,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    storyListViewModel.dispose();
   }
 
   @override
@@ -99,9 +106,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Center(
-                child: Image.network(
-                  story.images[0],
+                child: Image(
+                  image: NetworkImageWithRetry(story.images[0]),
                   height: 70,
+                  width: 70,
                 ),
               ),
               Container(
@@ -141,6 +149,12 @@ class _StoryContentPageState extends State<StoryContentPage> {
   void initState() {
     super.initState();
     storyContentViewModel.fetchStoryContent();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    storyContentViewModel.dispose();
   }
 
   @override
